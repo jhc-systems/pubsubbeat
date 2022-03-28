@@ -1,0 +1,38 @@
+steps:
+#  - name: google/cloud-sdk
+#    args: ["/bin/bash", "-c", "date; if gsutil ls gs://debezium-maven-repo/$REPO_NAME/repository; then mkdir -p ./_m2/; gsutil -m cp -R gs://debezium-maven-repo/$REPO_NAME/repository ./_m2/; fi && date" ]
+  
+  - name: "eu.gcr.io/fnz-poa-development/golang:latest"
+    entrypoint: "/bin/sh"
+    args:
+    - "-c"
+    - |
+      set -x
+      set -e 
+      set -o pipefail
+      date
+
+      echo build release version
+
+      make
+
+      date
+    timeout: "2400s"
+
+  - id: Build docker image
+    name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/pubsubbeat', '.' ]
+
+
+  - id: Delete untagged images
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        export IMAGE=pubsubbeat
+        gcloud container images list-tags eu.gcr.io/${PROJECT_ID}/$${IMAGE} --filter='-tags:*' --format='get(digest)' --limit=unlimited| xargs -r -I {arg} gcloud container images delete --quiet "eu.gcr.io/${PROJECT_ID}/$${IMAGE}@{arg}"
+
+#  - name: google/cloud-sdk
+#    args: ["/bin/bash", "-c", "date; gsutil -m cp -r ./_m2/repository gs://debezium-maven-repo/$REPO_NAME/; date"]
+timeout: "2400s"
