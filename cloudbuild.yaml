@@ -32,7 +32,7 @@ steps:
       - |
         export IMAGE=pubsubbeat
         gcloud container images list-tags eu.gcr.io/${PROJECT_ID}/$${IMAGE} --filter='-tags:*' --format='get(digest)' --limit=unlimited| xargs -r -I {arg} gcloud container images delete --quiet "eu.gcr.io/${PROJECT_ID}/$${IMAGE}@{arg}"
-
-#  - name: google/cloud-sdk
-#    args: ["/bin/bash", "-c", "date; gsutil -m cp -r ./_m2/repository gs://debezium-maven-repo/$REPO_NAME/; date"]
+        
+images:
+- 'eu.gcr.io/$PROJECT_ID/pubsubbeat:latest'
 timeout: "2400s"
