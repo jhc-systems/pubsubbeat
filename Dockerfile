@@ -4,4 +4,6 @@ RUN mkdir /app
 
 COPY pubsubbeat /app/
 
-ENTRYPOINT ["/app/pubsubbeat"]
+WORKDIR /app
+
+ENTRYPOINT ["/app/pubsubbeat", "-e"]
